@@ -1,0 +1,7 @@
+[package]
+name = "lip-json"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lip = "5.1.1"
