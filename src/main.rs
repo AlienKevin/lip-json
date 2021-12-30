@@ -62,11 +62,11 @@ fn value<'a>() -> BoxedParser<'a, Value, ()> {
 }
 
 fn string<'a>() -> BoxedParser<'a, String, ()> {
-    succeed!(|cs| cs.into_iter().collect())
+    succeed!(|cs: Vec<char>| cs.into_iter().collect())
         .skip(token("\""))
         .keep(zero_or_more_until(
             one_of!(
-                succeed!(|cs| cs[0]).keep(take_chomped(chomp_ifc(
+                succeed!(|cs: String| cs.chars().next().unwrap()).keep(take_chomped(chomp_ifc(
                     |c| needs_escape(c),
                     "Any Unicode characters except \" or \\ or control characters",
                 ))),
@@ -96,7 +96,7 @@ fn string<'a>() -> BoxedParser<'a, String, ()> {
 }
 
 fn hex_digit<'a>() -> BoxedParser<'a, char, ()> {
-    succeed!(|cs| cs[0]).keep(take_chomped(chomp_ifc(
+    succeed!(|cs: String| cs.chars().next().unwrap()).keep(take_chomped(chomp_ifc(
         |c| match *c {
             '0'..='9' | 'a'..='z' | 'A'..='Z' => true,
             _ => false,
@@ -106,7 +106,7 @@ fn hex_digit<'a>() -> BoxedParser<'a, char, ()> {
 }
 
 fn number<'a>() -> BoxedParser<'a, f64, ()> {
-    succeed!(|is_negative, n| if is_negative { -n } else { n })
+    succeed!(|is_negative: bool, n: f64| if is_negative { -n } else { n })
         .keep(optional(false, token("-").map(|_| true)))
         .keep(float())
 }
