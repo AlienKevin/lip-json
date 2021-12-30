@@ -139,7 +139,7 @@ fn is_non_escape(c: &char) -> bool {
 }
 
 fn main() {
-    let simple = include_str!("../data/simple/doc.json");
+    let simple = include_str!("../data/doc.json");
     match value().run(simple, ()) {
         ParseResult::Ok { output: v, .. } => println!("{:?}", v),
         ParseResult::Err {

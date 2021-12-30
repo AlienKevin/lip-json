@@ -1,0 +1,22 @@
+{
+    "menu": {
+        "id": "file",
+        "value": "File",
+        "popup": {
+            "menuitem": [
+                {
+                    "value": 3.1415e5,
+                    "onclick": "唔該你幫我揾個印刷機🙏"
+                },
+                {
+                    "value": -0.002,
+                    "onclick": "\u0041\u0042"
+                },
+                {
+                    "value": 0,
+                    "onclick": "CloseDoc()\nn!?@#$%^\t&*-=_+[]{}\\"
+                }
+            ]
+        }
+    }
+}
