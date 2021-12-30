@@ -6,7 +6,7 @@ use std::convert::identity;
 
 type Object = Vec<Member>;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct Member {
     key: String,
     value: Value,
@@ -14,7 +14,7 @@ struct Member {
 
 type Array = Vec<Value>;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 enum Value {
     VString(String),
     VNumber(f64),
