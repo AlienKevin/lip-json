@@ -26,6 +26,7 @@ enum Value {
 }
 
 fn object<'a>() -> BoxedParser<'a, Object, ()> {
+    // println!("object");
     sequence(
         "{",
         succeed!(|key, value| Member { key, value })
@@ -42,32 +43,40 @@ fn object<'a>() -> BoxedParser<'a, Object, ()> {
 }
 
 fn array<'a>() -> BoxedParser<'a, Array, ()> {
+    // println!("array");
     sequence("[", value(), ",", whitespace(), "]", Trailing::Forbidden)
 }
 
 fn value<'a>() -> BoxedParser<'a, Value, ()> {
+    // println!("value");
+    BoxedParser::new(move |input, location, state| value_helper().parse(input, location, state))
+}
+
+fn value_helper<'a>() -> BoxedParser<'a, Value, ()> {
+    // println!("value_helper");
     use Value::*;
     succeed!(identity)
         .skip(whitespace())
         .keep(one_of!(
             string().map(VString),
-            number().map(VNumber),
             object().map(VObject),
             array().map(VArray),
             token("true").map(|_| VTrue),
             token("false").map(|_| VFalse),
-            token("null").map(|_| VNull)
+            token("null").map(|_| VNull),
+            number().map(VNumber)
         ))
         .skip(whitespace())
 }
 
 fn string<'a>() -> BoxedParser<'a, String, ()> {
+    // println!("string");
     succeed!(|cs: Vec<char>| cs.into_iter().collect())
         .skip(token("\""))
         .keep(zero_or_more_until(
             one_of!(
                 succeed!(|cs: String| cs.chars().next().unwrap()).keep(take_chomped(chomp_ifc(
-                    |c| needs_escape(c),
+                    |c| is_non_escape(c),
                     "Any Unicode characters except \" or \\ or control characters",
                 ))),
                 succeed!(identity).skip(token("\\")).keep(one_of!(
@@ -106,12 +115,14 @@ fn hex_digit<'a>() -> BoxedParser<'a, char, ()> {
 }
 
 fn number<'a>() -> BoxedParser<'a, f64, ()> {
+    // println!("number");
     succeed!(|is_negative: bool, n: f64| if is_negative { -n } else { n })
         .keep(optional(false, token("-").map(|_| true)))
         .keep(float())
 }
 
 fn whitespace<'a>() -> BoxedParser<'a, (), ()> {
+    // println!("whitespace");
     succeed!(|_| ()).keep(zero_or_more(one_of!(
         chomp_ifc(|c| *c == '\x20', "a space"),
         chomp_ifc(|c| *c == '\t', "a horizontal tab"),
@@ -120,13 +131,19 @@ fn whitespace<'a>() -> BoxedParser<'a, (), ()> {
     )))
 }
 
-fn needs_escape(c: &char) -> bool {
+fn is_non_escape(c: &char) -> bool {
     match *c {
-        '\x00'..='\x1F' | '\\' | '\"' => true,
-        _ => false,
+        '\x00'..='\x1F' | '\\' | '\"' => false,
+        _ => true,
     }
 }
 
 fn main() {
-    println!("Hello, world!");
+    let simple = include_str!("../data/simple/doc.json");
+    match value().run(simple, ()) {
+        ParseResult::Ok { output: v, .. } => println!("{:?}", v),
+        ParseResult::Err {
+            message, from, to, ..
+        } => println!("{}", display_error(simple, message, from, to)),
+    }
 }
