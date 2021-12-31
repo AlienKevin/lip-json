@@ -112,8 +112,8 @@ fn hex_digit<'a>() -> BoxedParser<'a, char, ()> {
 
 fn number<'a>() -> BoxedParser<'a, f64, ()> {
     // println!("number");
-    succeed!(|is_negative: bool, n: f64| if is_negative { -n } else { n })
-        .keep(optional(false, token("-").map(|_| true)))
+    succeed!(|sign: Option<_>, n: f64| if let Some(_) = sign { -n } else { n })
+        .keep(optional(token("-")))
         .keep(float())
 }
 
