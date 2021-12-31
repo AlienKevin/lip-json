@@ -1,16 +1,11 @@
 use lip::Trailing;
 use lip::*;
+use std::collections::HashMap;
 use std::convert::identity;
 
 /// Mostly conformant to JSON spec defined at https://www.json.org/json-en.html
 
-type Object = Vec<Member>;
-
-#[derive(Debug, Clone)]
-struct Member {
-    key: String,
-    value: Value,
-}
+type Object = HashMap<String, Value>;
 
 type Array = Vec<Value>;
 
@@ -29,7 +24,7 @@ fn object<'a>() -> BoxedParser<'a, Object, ()> {
     // println!("object");
     sequence(
         "{",
-        succeed!(|key, value| Member { key, value })
+        succeed!(|key, value| (key, value))
             .skip(whitespace())
             .keep(string())
             .skip(whitespace())
@@ -40,6 +35,7 @@ fn object<'a>() -> BoxedParser<'a, Object, ()> {
         "}",
         Trailing::Forbidden,
     )
+    .map(|pairs| pairs.iter().cloned().collect())
 }
 
 fn array<'a>() -> BoxedParser<'a, Array, ()> {
