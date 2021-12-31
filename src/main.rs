@@ -15,8 +15,7 @@ enum Value {
     VNumber(f64),
     VObject(Object),
     VArray(Array),
-    VTrue,
-    VFalse,
+    VBool(bool),
     VNull,
 }
 
@@ -57,8 +56,8 @@ fn value_helper<'a>() -> BoxedParser<'a, Value, ()> {
             string().map(VString),
             object().map(VObject),
             array().map(VArray),
-            token("true").map(|_| VTrue),
-            token("false").map(|_| VFalse),
+            token("true").map(|_| VBool(true)),
+            token("false").map(|_| VBool(false)),
             token("null").map(|_| VNull),
             number().map(VNumber)
         ))
